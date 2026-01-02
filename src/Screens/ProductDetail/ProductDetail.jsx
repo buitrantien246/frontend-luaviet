@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const product = useSelector((state) => state.products.currentProduct);
   const relatedProduct = useSelector((state) => state.products.relatedProducts);
   const user = useSelector((state) => state.auth.user);
+  const accessToken = useSelector((state) => state.auth.accessToken);
   const orderByUser = useSelector((state) => state.cart.orderByUser);
   const [tourPrice, setTourPrice] = useState(null);
   const [dateTour, setDateTour] = useState(null);
@@ -56,34 +57,44 @@ const ProductDetail = () => {
       .replace("/", "-");
 
   const handleOrder = async () => {
-    if (!tourPrice || !dateTour) {
-      alert("Vui lòng chọn ngày khởi hành");
-      return;
-    }
+  // Chưa đăng nhập
+  if (!accessToken) {
+    alert("Vui lòng đăng nhập để đặt tour");
+    navigate("/dang-nhap");
+    return;
+  }
 
-    const userInfo = user ? JSON.parse(user) : {};
-    const orderData = {
-      productId: product.id,
-      productName: product.name,
-      price: tourPrice,
-      departureDate: dateTour,
-      returnDate: endDate,
-      userName: userInfo.name || "",
-      userEmail: userInfo.email || "",
-      userPhone: userInfo.phone || "",
-    };
+  // Chưa chọn ngày / giá
+  if (!tourPrice || !dateTour) {
+    alert("Vui lòng chọn ngày khởi hành");
+    return;
+  }
 
-    try {
-      const result = await dispatch(addCart(orderData));
-      if (result.payload) {
-        navigate("/booking");
-      } else {
-        alert("Có lỗi khi đặt tour, vui lòng thử lại");
-      }
-    } catch (error) {
-      alert("Có lỗi khi đặt tour: " + error.message);
-    }
+  const userInfo = user ? JSON.parse(user) : {};
+
+  const orderData = {
+    productId: product.id,
+    productName: product.name,
+    price: tourPrice,
+    departureDate: dateTour,
+    returnDate: endDate,
+    userName: userInfo.name || "",
+    userEmail: userInfo.email || "",
+    userPhone: userInfo.phone || "",
   };
+
+  try {
+    const result = await dispatch(addCart(orderData));
+    if (result.payload) {
+      navigate("/booking");
+    } else {
+      alert("Có lỗi khi đặt tour, vui lòng thử lại");
+    }
+  } catch (error) {
+    alert("Có lỗi khi đặt tour: " + error.message);
+  }
+};
+
 
   return (
     <>

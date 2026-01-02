@@ -32,9 +32,7 @@ const App = () => {
         <Route
           path="/tour-du-lich/:slug"
           element={
-            <ProtectedRoute>
               <ProductDetail />
-            </ProtectedRoute>
           }
         />
         <Route path="/dang-ky" element={<Register />} />
